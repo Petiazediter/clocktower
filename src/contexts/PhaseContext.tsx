@@ -1,11 +1,12 @@
 import { createContext, useCallback, useContext, useState } from "react";
 
-type Phase = "Setup";
+type Phase = "Setup" | "RoleSelection";
 
 type PhaseContextType = {
   isGameStarted: boolean,
   startGame: () => void,
-  phase: Phase
+  phase: Phase,
+  nextPhase: () => void
 }
 
 const PhaseContext = createContext<PhaseContextType | null>(null);
@@ -19,8 +20,20 @@ export function PhaseContextProvider({ children }: { children: React.ReactNode }
     setPhase('Setup');
   }, []);
 
+  const nextPhase = useCallback( () => {
+    switch (phase) {
+      case 'Setup':
+        setPhase('RoleSelection');
+        break;
+      case 'RoleSelection':
+        throw new Error('No more phases');
+      default:
+        throw new Error('Invalid phase');
+    }
+  }, [phase]);
+
   return (
-    <PhaseContext.Provider value={{ isGameStarted, startGame, phase }}>
+    <PhaseContext.Provider value={{ isGameStarted, startGame, phase, nextPhase }}>
       {children}
     </PhaseContext.Provider>
   )
